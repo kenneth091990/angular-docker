@@ -1,4 +1,12 @@
-FROM nginx:1.17.1-alpine
-COPY /dist/angular-docker /usr/share/nginx/html
+FROM node:14.2.0-alpine3.11 as build
+WORKDIR /app
 
-EXPOSE 3000
+RUN npm install -g @angular/cli
+
+COPY ./package.json .
+RUN npm install
+COPY . .
+RUN ng build
+
+FROM nginx as runtime
+COPY --from=build /app/dist/angular-docker /usr/share/nginx/html
